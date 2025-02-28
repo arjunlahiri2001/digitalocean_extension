@@ -1,0 +1,8 @@
+services:
+  - name: my-server
+    env: python
+    build_command: pip install -r requirements.txt
+    start_command: uvicorn server:app --host 0.0.0.0 --port 8080
+    http_port: 8080
+    routes:
+      - path: /
