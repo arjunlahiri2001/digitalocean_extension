@@ -6,6 +6,8 @@ import json
 from system_prompt import SYSTEM_MESSAGE  # SYSTEM_MESSAGE is a dictionary
 from AgentWrapper import AgentWrapper
 from prompt_template import PROMPT_TEMPLATE
+from typing import AsyncGenerator
+
 
 
 app = FastAPI()
@@ -90,9 +92,12 @@ async def completion(request: Request):
     #     status_code=response.status_code,
     # )
 
-    return Response(
-        content=doc_bot_response,
-        media_type="text/plain",  # Change media type to avoid event-stream issues
+    async def fake_stream(data: str) -> AsyncGenerator[str, None]:
+        yield data  # This makes it a generator, so Copilot won't complain
+
+    return StreamingResponse(
+        fake_stream(doc_bot_response),  # Fake streaming response
+        media_type="text/event-stream",
         status_code=200
     )
 
