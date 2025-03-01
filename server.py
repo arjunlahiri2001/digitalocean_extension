@@ -1,6 +1,6 @@
 import httpx
 from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, Response
 import debugpy
 import json
 from system_prompt import SYSTEM_MESSAGE  # SYSTEM_MESSAGE is a dictionary
@@ -90,9 +90,9 @@ async def completion(request: Request):
     #     status_code=response.status_code,
     # )
 
-    return StreamingResponse(
-        iter([doc_bot_response]),  # Makes it iterable to mimic streaming
-        media_type="text/event-stream",
+    return Response(
+        content=doc_bot_response,
+        media_type="text/plain",  # Change media type to avoid event-stream issues
         status_code=200
     )
 
