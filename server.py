@@ -33,10 +33,10 @@ def prepare_messages(messages: list, code_context: str, doc_bot_response: str) -
 
 async def get_github_completion(messages: list, auth_token: str, code_context: str, doc_bot_response: str):
     """Prepare messages and send them to GitHub Copilot API."""
-    formatted_messages = prepare_messages(messages, code_context, doc_bot_response)  # Now includes doc_bot_response
+    formatted_messages = prepare_messages(messages, code_context, doc_bot_response)
 
-    with open("data_with_sys.json", "w") as f:
-        json.dump(formatted_messages, f, indent=4)
+    # 🔥 Debug: Print the JSON payload being sent to GitHub Copilot
+    print("\nDEBUG - JSON Payload Sent to GitHub Copilot API:\n", json.dumps(formatted_messages, indent=4))
 
     async with httpx.AsyncClient() as client:
         response = await client.post(
@@ -47,10 +47,22 @@ async def get_github_completion(messages: list, auth_token: str, code_context: s
             },
             json={
                 "messages": formatted_messages,
-                "stream": True,
+                "stream": True,  # Ensure streaming response
             },
             timeout=30.0,
         )
+
+        # 🔥 Debug: Print GitHub Copilot's Response Status and Headers
+        print("\nDEBUG - GitHub Copilot Response Status:", response.status_code)
+        print("DEBUG - GitHub Copilot Response Headers:", response.headers)
+
+        # 🔥 Debug: Print the response as JSON if it's not streaming
+        try:
+            json_response = await response.json()
+            print("\nDEBUG - GitHub Copilot JSON Response:\n", json.dumps(json_response, indent=4))
+        except Exception:
+            print("\nDEBUG - Copilot Response is not JSON, Streaming...")
+
         return response
 
 
@@ -85,32 +97,31 @@ async def completion(request: Request):
     print(doc_bot_response)
 
     # Call GitHub Copilot API with both code and documentation context
-    # response = await get_github_completion(messages, auth_token, code_context, doc_bot_response)
-
-    # return StreamingResponse(
-    #     doc_bot_response,
-    #     # response.aiter_bytes(),
-    #     media_type="text/event-stream",
-    #     status_code=response.status_code,
-    # )
-
-    async def proper_stream(data: str) -> AsyncGenerator[str, None]:
-        print("🚨 DEBUG: Starting stream...")
-    
-        for chunk in data.split():  # Stream word-by-word
-            message = json.dumps({"choices": [{"content": chunk}]})  # Correct JSON format
-            print(f"🚨 DEBUG: Sending chunk: {message}")  # Logs each chunk sent
-            yield f"data: {message}\n\n"
-            await asyncio.sleep(0.1)  # Prevents immediate connection close
-    
-        print("DEBUG: Stream finished.")  # Ensure loop completed
-
+    response = await get_github_completion(messages, auth_token, code_context, doc_bot_response)
 
     return StreamingResponse(
-        proper_stream(doc_bot_response),
+        response.aiter_bytes(),
         media_type="text/event-stream",
-        status_code=200
+        status_code=response.status_code,
     )
+
+    # async def proper_stream(data: str) -> AsyncGenerator[str, None]:
+    #     print("🚨 DEBUG: Starting stream...")
+    
+    #     for chunk in data.split():  # Stream word-by-word
+    #         message = json.dumps({"choices": [{"content": chunk}]})  # Correct JSON format
+    #         print(f"🚨 DEBUG: Sending chunk: {message}")  # Logs each chunk sent
+    #         yield f"data: {message}\n\n"
+    #         await asyncio.sleep(0.1)  # Prevents immediate connection close
+    
+    #     print("DEBUG: Stream finished.")  # Ensure loop completed
+
+
+    # return StreamingResponse(
+    #     proper_stream(doc_bot_response),
+    #     media_type="text/event-stream",
+    #     status_code=200
+    # )
 
 
 
