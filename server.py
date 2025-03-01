@@ -99,29 +99,34 @@ async def completion(request: Request):
     # Call GitHub Copilot API with both code and documentation context
     response = await get_github_completion(messages, auth_token, code_context, doc_bot_response)
 
-    return StreamingResponse(
-        response.aiter_bytes(),
-        media_type="text/event-stream",
-        status_code=response.status_code,
-    )
-
-    # async def proper_stream(data: str) -> AsyncGenerator[str, None]:
-    #     print("🚨 DEBUG: Starting stream...")
-    
-    #     for chunk in data.split():  # Stream word-by-word
-    #         message = json.dumps({"choices": [{"content": chunk}]})  # Correct JSON format
-    #         print(f"🚨 DEBUG: Sending chunk: {message}")  # Logs each chunk sent
-    #         yield f"data: {message}\n\n"
-    #         await asyncio.sleep(0.1)  # Prevents immediate connection close
-    
-    #     print("DEBUG: Stream finished.")  # Ensure loop completed
-
-
     # return StreamingResponse(
-    #     proper_stream(doc_bot_response),
+    #     response.aiter_bytes(),
     #     media_type="text/event-stream",
-    #     status_code=200
+    #     status_code=response.status_code,
     # )
+
+    async def stream_doc_response(doc_response: str):
+        """Stream the response in GitHub Copilot's expected format."""
+        yield "event: message\n"  # Copilot expects event-style streaming
+        for line in doc_response.split("\n"):  # Break into lines
+            formatted_response = json.dumps({
+                "role": "assistant",
+                "content": line,
+                "copilot_references": [],
+                "copilot_confirmations": None
+            })
+            yield f"data: {formatted_response}\n\n"
+            await asyncio.sleep(0.05)  # Simulate real-time streaming
+
+    return StreamingResponse(
+        stream_doc_response(doc_bot_response),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive"
+        },
+        status_code=200
+    )
 
 
 
