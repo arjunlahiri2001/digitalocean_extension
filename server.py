@@ -103,7 +103,7 @@ async def completion(request: Request):
             yield f"data: {message}\n\n"
             await asyncio.sleep(0.1)  # Prevents immediate connection close
     
-        print("🚨 DEBUG: Stream finished.")  # Ensure loop completed
+        print("DEBUG: Stream finished.")  # Ensure loop completed
 
 
     return StreamingResponse(
