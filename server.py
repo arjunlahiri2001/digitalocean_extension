@@ -97,7 +97,7 @@ async def completion(request: Request):
     print(doc_bot_response)
 
     # Call GitHub Copilot API with both code and documentation context
-    response = await get_github_completion(messages, auth_token, code_context, doc_bot_response)
+    # response = await get_github_completion(messages, auth_token, code_context, doc_bot_response)
 
     # return StreamingResponse(
     #     response.aiter_bytes(),
@@ -106,25 +106,15 @@ async def completion(request: Request):
     # )
 
     async def stream_doc_response(doc_response: str):
-        """Stream the response in GitHub Copilot's expected format."""
-        yield "event: message\n"  # Copilot expects event-style streaming
-        for line in doc_response.split("\n"):  # Break into lines
-            formatted_response = json.dumps({
-                "role": "assistant",
-                "content": line,
-                "copilot_references": [],
-                "copilot_confirmations": None
-            })
-            yield f"data: {formatted_response}\n\n"
-            await asyncio.sleep(0.05)  # Simulate real-time streaming
+        """Stream response in raw bytes to mimic GitHub Copilot's original stream format."""
+        for line in doc_response.split("\n"):
+            chunk = (line + "\n").encode("utf-8")  # Convert to bytes
+            yield chunk
+            await asyncio.sleep(0.05)  # Simulate streaming behavior
 
     return StreamingResponse(
         stream_doc_response(doc_bot_response),
         media_type="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive"
-        },
         status_code=200
     )
 
