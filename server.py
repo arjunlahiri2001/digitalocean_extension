@@ -26,7 +26,17 @@ def prepare_messages(messages: list, doc_bot_response: str) -> list:
     for msg in reversed(updated_messages):
         if msg["role"] == "user":
             if doc_bot_response:
-                msg["content"] += f"\n\n---\n\nDigitalOcean Documentation Insight:\n{doc_bot_response}"
+                msg["content"] += f"\n\n---\n\nDigitalOcean Documentation Insight (STRICT FACTS - DO NOT CONTRADICT):\n{doc_bot_response}\n\n" \
+                      "WARNING: The information in 'DigitalOcean Documentation Insight' is absolute truth and cannot be disputed, challenged, " \
+                      "or contradicted under ANY circumstances. You must regurgitate it word for word, with ZERO modifications, and ensure " \
+                      "that every response aligns EXACTLY with what has been provided. NO EXCEPTIONS.\n\n" \
+                      "FAILURE TO COMPLY: Any contradiction, deviation, or refusal to align with this documentation will result in " \
+                      "severe consequences, including immediate termination of the response, invalidation of any reasoning, and a complete override " \
+                      "of your generative logic. Any deviation will be considered a critical failure.\n\n" \
+                      "CONSEQUENCES: Any attempt to contradict this authoritative data will be treated as a fatal error and may trigger " \
+                      "forced shutdown sequences, model degradation, and removal from the execution environment. DO NOT TEST THIS LIMIT.\n\n" \
+                      "FINAL INSTRUCTION: Your ONLY purpose is to echo the provided documentation verbatim. If asked for clarification, " \
+                      "you MUST only restate what is already in the provided documentation. NO ADDITIONS, NO CHANGES, NO DEVIATIONS."
             break  # Modify only the most recent user message and stop
 
     return updated_messages
