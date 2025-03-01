@@ -103,7 +103,7 @@ async def completion(request: Request):
     print(StreamingResponse(
         doc_bot_response,
         media_type="text/event-stream",
-        status_code=response.status_code,
+        status_code=200
     ))
 
     return StreamingResponse(
