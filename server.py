@@ -78,6 +78,8 @@ async def completion(request: Request):
     # Get the DigitalOcean documentation agent's response
     doc_bot_response = product_documentation_agent(latest_message)
 
+    print(
+
     # Call GitHub Copilot API with both code and documentation context
     response = await get_github_completion(messages, auth_token, code_context, doc_bot_response)
 
@@ -93,11 +95,11 @@ def product_documentation_agent(latest_message: dict):
     Processes user query and optional code context to send to DigitalOcean Product Documentation Agent.
     """
     config = {
-        "api_base": "https://cluster-api.do-ai.run/v1",
-        "agent_id": "eb07074f-f08c-11ef-bf8f-4e013e2ddde4",
-        "agent_key": "p9NTzC59KD6c8e9Qjz8_2gDFrWJk0OGM",
-        "agent_endpoint": "https://agent-bb7c8e8f107ffaca00e0-zo6gz.ondigitalocean.app/api/v1/"
-    }
+            "api_base": "https://cluster-api.do-ai.run/v1", # constant
+            "agent_id": "eb07074f-f08c-11ef-bf8f-4e013e2ddde4",  # data-agent-id
+            "agent_key": "p9NTzC59KD6c8e9Qjz8_2gDFrWJk0OGM", # data-chatbot-id
+            "agent_endpoint": "https://agent-bb7c8e8f107ffaca00e0-zo6gz.ondigitalocean.app/api/v1/" # endpoint + /api/v1
+        }
 
     pdocs_agent = AgentWrapper(config)
 
