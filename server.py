@@ -65,7 +65,11 @@ async def get_github_completion(messages: list, auth_token: str, code_context: s
 
         print(response)
         
-        print(response.aiter_bytes())
+        print(StreamingResponse(
+        response.aiter_bytes(),
+        media_type="text/event-stream",
+        status_code=response.status_code,
+    ))
 
         return response
 
