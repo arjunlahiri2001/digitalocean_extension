@@ -63,6 +63,8 @@ async def get_github_completion(messages: list, auth_token: str, code_context: s
         except Exception:
             print("\nDEBUG - Copilot Response is not JSON, Streaming...")
 
+        print(response)
+        
         print(response.aiter_bytes())
 
         return response
