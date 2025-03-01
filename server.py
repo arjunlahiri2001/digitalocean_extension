@@ -94,7 +94,7 @@ async def completion(request: Request):
     print(doc_bot_response)
 
     # Call GitHub Copilot API with both code and documentation context
-    response = await get_github_completion(messages, auth_token, code_context, doc_bot_response)
+    response = await get_github_completion(messages, auth_token, doc_bot_response)
 
     print(StreamingResponse(
         response.aiter_bytes(),
