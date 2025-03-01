@@ -16,27 +16,27 @@ app = FastAPI()
 debugpy.listen(("0.0.0.0", 8888))
 
 
-def prepare_messages(messages: list, code_context: str, doc_bot_response: str) -> list:
-    """Append SYSTEM_MESSAGE to the extracted messages, including code context and doc_bot_response if available."""
-    system_message = SYSTEM_MESSAGE.copy()  # Avoid modifying the original dict
+def prepare_messages(messages: list, doc_bot_response: str) -> list:
+    """Append doc_bot_response to the latest user message instead of modifying SYSTEM_MESSAGE."""
 
-    # Incorporate DigitalOcean documentation response if available
-    if doc_bot_response:
-        system_message["content"] += f"\n\n---\n\nDigitalOcean Documentation Insight:\n{doc_bot_response}"
+    # Ensure we don't modify the original list
+    updated_messages = messages.copy()
 
-    # Incorporate code context if available
-    if code_context:
-        system_message["content"] += f"\n\n---\n\nHere is the full content of the latest file:\n{code_context}"
+    # Find the latest user message and append doc_bot_response
+    for msg in reversed(updated_messages):
+        if msg["role"] == "user":
+            if doc_bot_response:
+                msg["content"] += f"\n\n---\n\nDigitalOcean Documentation Insight:\n{doc_bot_response}"
+            break  # Modify only the most recent user message and stop
 
-    return messages + [system_message]
+    return updated_messages
 
 
-async def get_github_completion(messages: list, auth_token: str, code_context: str, doc_bot_response: str):
+async def get_github_completion(messages: list, auth_token: str, doc_bot_response: str):
     """Prepare messages and send them to GitHub Copilot API."""
-    formatted_messages = prepare_messages(messages, code_context, doc_bot_response)
-
-    # 🔥 Debug: Print the JSON payload being sent to GitHub Copilot
-    # print("\nDEBUG - JSON Payload Sent to GitHub Copilot API:\n", json.dumps(formatted_messages, indent=4))
+    
+    # Prepare messages with DigitalOcean doc response added to user query
+    formatted_messages = prepare_messages(messages, doc_bot_response)
 
     async with httpx.AsyncClient() as client:
         response = await client.post(
@@ -52,19 +52,15 @@ async def get_github_completion(messages: list, auth_token: str, code_context: s
             timeout=30.0,
         )
 
-        # 🔥 Debug: Print GitHub Copilot's Response Status and Headers
-        # print("\nDEBUG - GitHub Copilot Response Status:", response.status_code)
-        # print("DEBUG - GitHub Copilot Response Headers:", response.headers)
-
-        # 🔥 Debug: Print the response as JSON if it's not streaming
+        # Debugging output (can be removed in production)
         try:
             json_response = await response.json()
             print("\nDEBUG - GitHub Copilot JSON Response:\n", json.dumps(json_response, indent=4))
         except Exception:
             print("\nDEBUG - Copilot Response is not JSON, Streaming...")
-        
-        
+
         return response
+
 
 
 @app.post("/completion")
