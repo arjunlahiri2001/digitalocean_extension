@@ -83,11 +83,17 @@ async def completion(request: Request):
     # Call GitHub Copilot API with both code and documentation context
     # response = await get_github_completion(messages, auth_token, code_context, doc_bot_response)
 
+    # return StreamingResponse(
+    #     doc_bot_response,
+    #     # response.aiter_bytes(),
+    #     media_type="text/event-stream",
+    #     status_code=response.status_code,
+    # )
+
     return StreamingResponse(
-        doc_bot_response,
-        # response.aiter_bytes(),
+        doc_bot_response,  # Using the string response directly
         media_type="text/event-stream",
-        status_code=response.status_code,
+        status_code=200  # Static status code
     )
 
 
