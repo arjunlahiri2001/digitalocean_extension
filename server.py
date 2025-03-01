@@ -91,10 +91,11 @@ async def completion(request: Request):
     # )
 
     return StreamingResponse(
-        doc_bot_response,  # Using the string response directly
+        iter([doc_bot_response]),  # Makes it iterable to mimic streaming
         media_type="text/event-stream",
-        status_code=200  # Static status code
+        status_code=200
     )
+
 
 
 def product_documentation_agent(latest_message: dict):
