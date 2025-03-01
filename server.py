@@ -62,15 +62,8 @@ async def get_github_completion(messages: list, auth_token: str, code_context: s
             print("\nDEBUG - GitHub Copilot JSON Response:\n", json.dumps(json_response, indent=4))
         except Exception:
             print("\nDEBUG - Copilot Response is not JSON, Streaming...")
-
-        print(response)
         
-        print(StreamingResponse(
-        response.aiter_bytes(),
-        media_type="text/event-stream",
-        status_code=response.status_code,
-    ))
-
+        
         return response
 
 
@@ -106,6 +99,12 @@ async def completion(request: Request):
 
     # Call GitHub Copilot API with both code and documentation context
     response = await get_github_completion(messages, auth_token, code_context, doc_bot_response)
+
+    print(StreamingResponse(
+        doc_bot_response,
+        media_type="text/event-stream",
+        status_code=response.status_code,
+    ))
 
     return StreamingResponse(
         response.aiter_bytes(),
