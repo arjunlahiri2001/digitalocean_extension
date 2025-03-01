@@ -95,19 +95,16 @@ async def completion(request: Request):
     # )
 
     async def proper_stream(data: str) -> AsyncGenerator[str, None]:
-        print("🚨 DEBUG: Starting stream...")  # Check if function is called
-        
+        print("🚨 DEBUG: Starting stream...")
+    
         for chunk in data.split():  # Stream word-by-word
-            message = {"content": chunk}
-            formatted_message = f"event: message\ndata: {json.dumps(message)}\n\n"
-    
-            # 🔥 PRINT DEBUG INFO 🔥
-            print(f"🚨 DEBUG: Sending chunk: {formatted_message.strip()}")  # Shows each chunk being sent
-    
-            yield formatted_message
-            await asyncio.sleep(0.2)  # Mimic streaming delay
+            message = json.dumps({"choices": [{"content": chunk}]})  # Correct JSON format
+            print(f"🚨 DEBUG: Sending chunk: {message}")  # Logs each chunk sent
+            yield f"data: {message}\n\n"
+            await asyncio.sleep(0.1)  # Prevents immediate connection close
     
         print("🚨 DEBUG: Stream finished.")  # Ensure loop completed
+
 
     return StreamingResponse(
         proper_stream(doc_bot_response),
