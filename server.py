@@ -36,7 +36,7 @@ async def get_github_completion(messages: list, auth_token: str, code_context: s
     formatted_messages = prepare_messages(messages, code_context, doc_bot_response)
 
     # 🔥 Debug: Print the JSON payload being sent to GitHub Copilot
-    print("\nDEBUG - JSON Payload Sent to GitHub Copilot API:\n", json.dumps(formatted_messages, indent=4))
+    # print("\nDEBUG - JSON Payload Sent to GitHub Copilot API:\n", json.dumps(formatted_messages, indent=4))
 
     async with httpx.AsyncClient() as client:
         response = await client.post(
@@ -53,8 +53,8 @@ async def get_github_completion(messages: list, auth_token: str, code_context: s
         )
 
         # 🔥 Debug: Print GitHub Copilot's Response Status and Headers
-        print("\nDEBUG - GitHub Copilot Response Status:", response.status_code)
-        print("DEBUG - GitHub Copilot Response Headers:", response.headers)
+        # print("\nDEBUG - GitHub Copilot Response Status:", response.status_code)
+        # print("DEBUG - GitHub Copilot Response Headers:", response.headers)
 
         # 🔥 Debug: Print the response as JSON if it's not streaming
         try:
@@ -62,6 +62,8 @@ async def get_github_completion(messages: list, auth_token: str, code_context: s
             print("\nDEBUG - GitHub Copilot JSON Response:\n", json.dumps(json_response, indent=4))
         except Exception:
             print("\nDEBUG - Copilot Response is not JSON, Streaming...")
+
+        print(response.aiter_bytes())
 
         return response
 
