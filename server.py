@@ -92,11 +92,13 @@ async def completion(request: Request):
     #     status_code=response.status_code,
     # )
 
-    async def fake_stream(data: str) -> AsyncGenerator[str, None]:
-        yield data  # This makes it a generator, so Copilot won't complain
+    async def proper_stream(data: str) -> AsyncGenerator[str, None]:
+        for chunk in data.split():  # Stream word-by-word (adjust as needed)
+            yield f"event: message\ndata: {json.dumps({'content': chunk})}\n\n"
+            await asyncio.sleep(0.2)  # Small delay to mimic streaming
 
     return StreamingResponse(
-        fake_stream(doc_bot_response),  # Fake streaming response
+        proper_stream(doc_bot_response),
         media_type="text/event-stream",
         status_code=200
     )
