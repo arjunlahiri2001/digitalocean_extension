@@ -38,6 +38,8 @@ async def get_github_completion(messages: list, auth_token: str, doc_bot_respons
     # Prepare messages with DigitalOcean doc response added to user query
     formatted_messages = prepare_messages(messages, doc_bot_response)
 
+    print(formatted_messages)
+
     async with httpx.AsyncClient() as client:
         response = await client.post(
             "https://api.githubcopilot.com/chat/completions",
@@ -91,16 +93,8 @@ async def completion(request: Request):
     # Get the DigitalOcean documentation agent's response
     doc_bot_response = product_documentation_agent(latest_message)
 
-    print(doc_bot_response)
-
     # Call GitHub Copilot API with both code and documentation context
     response = await get_github_completion(messages, auth_token, doc_bot_response)
-
-    print(StreamingResponse(
-        response.aiter_bytes(),
-        media_type="text/event-stream",
-        status_code=response.status_code,
-    ))
 
     return StreamingResponse(
         response.aiter_bytes(),
