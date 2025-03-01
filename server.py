@@ -78,13 +78,13 @@ async def completion(request: Request):
     # Get the DigitalOcean documentation agent's response
     doc_bot_response = product_documentation_agent(latest_message)
 
-    print(doct_bot_response)
+    print(doc_bot_response)
 
     # Call GitHub Copilot API with both code and documentation context
     # response = await get_github_completion(messages, auth_token, code_context, doc_bot_response)
 
     return StreamingResponse(
-        doct_bot_response,
+        doc_bot_response,
         # response.aiter_bytes(),
         media_type="text/event-stream",
         status_code=response.status_code,
