@@ -100,6 +100,8 @@ async def completion(request: Request):
         ]
     }
 
+    print(response_payload)
+
     return JSONResponse(content=response_payload)
     # req = await request.json()
     # auth_token = request.headers.get("x-github-token")
