@@ -90,23 +90,27 @@ async def completion(request: Request):
     if not messages:
         raise HTTPException(status_code=400, detail="No messages provided")
 
-    # Extract code content from the latest message if references exist
-    code_context = ""
-    latest_message = messages[-1]
-    if latest_message.get("copilot_references"):
-        for ref in latest_message["copilot_references"]:
-            if ref.get("type") == "client.file":
-                file_name = ref["id"]
-                code_content = ref["data"]["content"]
-                code_context = f"\n\nFILENAME:\n{file_name}\n\nCODE CONTENT:\n{code_content}"
 
-    # Get the DigitalOcean documentation agent's response
-    doc_bot_response = product_documentation_agent(latest_message)
+    return {
+        "role": "assistant",
+        "content": "This is a custom response intercepted by FastAPI before reaching GitHub Copilot."
+    }
 
-    # Call GitHub Copilot API with both code and documentation context
-    response = await get_github_completion(messages, auth_token, doc_bot_response)
+    # # Extract code content from the latest message if references exist
+    # code_context = ""
+    # latest_message = messages[-1]
+    # if latest_message.get("copilot_references"):
+    #     for ref in latest_message["copilot_references"]:
+    #         if ref.get("type") == "client.file":
+    #             file_name = ref["id"]
+    #             code_content = ref["data"]["content"]
+    #             code_context = f"\n\nFILENAME:\n{file_name}\n\nCODE CONTENT:\n{code_content}"
 
-    return "Hello there!"
+    # # Get the DigitalOcean documentation agent's response
+    # doc_bot_response = product_documentation_agent(latest_message)
+
+    # # Call GitHub Copilot API with both code and documentation context
+    # response = await get_github_completion(messages, auth_token, doc_bot_response)
 
     # return StreamingResponse(
     #     response.aiter_bytes(),
