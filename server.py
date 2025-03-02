@@ -78,23 +78,39 @@ async def get_github_completion(messages: list, auth_token: str, doc_bot_respons
 @app.post("/completion")
 async def completion(request: Request):
     """Extract last 10 messages, process them, and send to GitHub Copilot."""
-    req = await request.json()
-    auth_token = request.headers.get("x-github-token")
 
-    # Extract only the last 10 messages
-    messages = req.get("messages", [])[-10:]
+    req_data = await request.json()
 
-    if not auth_token:
-        raise HTTPException(status_code=401, detail="Missing authentication token")
-
-    if not messages:
-        raise HTTPException(status_code=400, detail="No messages provided")
-
-
-    return {
-        "role": "assistant",
-        "content": "This is a custom response intercepted by FastAPI before reaching GitHub Copilot."
+    response_payload = {
+        "id": "response-id-001",
+        "object": "chat.completion",
+        "created": int(time.time()),
+        "model": "custom-server-response",
+        "choices": [  # ✅ MUST include choices
+            {
+                "index": 0,
+                "message": {
+                    "role": "assistant",
+                    "content": "Hello! This is a static response from my custom Copilot integration."
+                },
+                "finish_reason": "stop"
+            }
+        ]
     }
+
+    return JSONResponse(content=response_payload)
+    # req = await request.json()
+    # auth_token = request.headers.get("x-github-token")
+
+    # # Extract only the last 10 messages
+    # messages = req.get("messages", [])[-10:]
+
+    # if not auth_token:
+    #     raise HTTPException(status_code=401, detail="Missing authentication token")
+
+    # if not messages:
+    #     raise HTTPException(status_code=400, detail="No messages provided")
+
 
     # # Extract code content from the latest message if references exist
     # code_context = ""
